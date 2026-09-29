@@ -59,7 +59,14 @@ public interface ClienteMapper {
     @Mapping(target = "activo", ignore = true)
     @Mapping(target = "penalizaciones", ignore = true)
     @Mapping(target = "reservas", ignore = true)
-    void actualizarCliente(ActualizarClienteRequest request, @MappingTarget Cliente cliente);
+    void updateClienteFromDto(ActualizarClienteRequest request, @MappingTarget Cliente cliente);
+
+    /**
+     * Alias en español conservado para no romper consumidores existentes del mapper.
+     */
+    default void actualizarCliente(ActualizarClienteRequest request, Cliente cliente) {
+        updateClienteFromDto(request, cliente);
+    }
 
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "activo", ignore = true)

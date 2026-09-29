@@ -1,0 +1,96 @@
+{
+  "info": {
+    "_postman_id": "c98e65dc-06f7-4a8c-a0ab-2c4a4f77b915",
+    "name": "Hotel - Taller avanzado (evidencia final)",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:8080/api" },
+    { "key": "clienteId", "value": "" },
+    { "key": "suiteId", "value": "" }
+  ],
+  "item": [
+    {
+      "name": "0. Crear cliente de evidencia",
+      "event": [{
+        "listen": "test",
+        "script": { "exec": [
+          "pm.test('Estado 201 Created', () => pm.response.to.have.status(201));",
+          "pm.collectionVariables.set('clienteId', pm.response.json().id);"
+        ] }
+      }],
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": { "mode": "raw", "raw": "{\n  \"nombre\": \"Cliente Taller Evidencia\",\n  \"email\": \"evidencia.20260929@hotel.com\"\n}", "options": { "raw": { "language": "json" } } },
+        "url": { "raw": "{{baseUrl}}/clientes", "host": ["{{baseUrl}}"], "path": ["clientes"] }
+      }
+    },
+    {
+      "name": "1. Crear Suite Presidencial",
+      "event": [{
+        "listen": "test",
+        "script": { "exec": [
+          "pm.test('Estado 201 Created', () => pm.response.to.have.status(201));",
+          "pm.test('Conserva atributos de Suite', () => { const j = pm.response.json(); pm.expect(j.tipo).to.eql('SUITE'); pm.expect(j.jacuzziPrivado).to.be.true; pm.expect(j.incluyeMayordomo).to.be.true; });",
+          "pm.collectionVariables.set('suiteId', pm.response.json().id);"
+        ] }
+      }],
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": { "mode": "raw", "raw": "{\n  \"numero\": \"P05-501\",\n  \"precioPorNoche\": 350.0,\n  \"capacidadMaxima\": 2,\n  \"jacuzziPrivado\": true,\n  \"incluyeMayordomo\": true\n}", "options": { "raw": { "language": "json" } } },
+        "url": { "raw": "{{baseUrl}}/habitaciones/suites", "host": ["{{baseUrl}}"], "path": ["habitaciones", "suites"] }
+      }
+    },
+    {
+      "name": "Preparación - Crear habitación estándar",
+      "event": [{ "listen": "test", "script": { "exec": ["pm.test('Estado 201 Created', () => pm.response.to.have.status(201));"] } }],
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": { "mode": "raw", "raw": "{\n  \"numero\": \"E02-201\",\n  \"precioPorNoche\": 120.0,\n  \"capacidadMaxima\": 2,\n  \"camasIndividuales\": 2\n}", "options": { "raw": { "language": "json" } } },
+        "url": { "raw": "{{baseUrl}}/habitaciones/estandares", "host": ["{{baseUrl}}"], "path": ["habitaciones", "estandares"] }
+      }
+    },
+    {
+      "name": "Preparación - Crear reserva",
+      "event": [{ "listen": "test", "script": { "exec": ["pm.test('Estado 201 Created', () => pm.response.to.have.status(201));"] } }],
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": { "mode": "raw", "raw": "{\n  \"clienteId\": \"{{clienteId}}\",\n  \"habitacionId\": \"{{suiteId}}\",\n  \"fechaInicio\": \"2026-10-01T15:00:00\",\n  \"fechaFin\": \"2026-10-03T15:00:00\"\n}", "options": { "raw": { "language": "json" } } },
+        "url": { "raw": "{{baseUrl}}/reservas", "host": ["{{baseUrl}}"], "path": ["reservas"] }
+      }
+    },
+    {
+      "name": "2. Consulta polimórfica",
+      "event": [{ "listen": "test", "script": { "exec": [
+        "pm.test('Estado 200 OK', () => pm.response.to.have.status(200));",
+        "pm.test('Conviven ESTANDAR y SUITE', () => { const tipos = pm.response.json().map(x => x.tipo); pm.expect(tipos).to.include('ESTANDAR'); pm.expect(tipos).to.include('SUITE'); });"
+      ] } }],
+      "request": { "method": "GET", "header": [], "url": { "raw": "{{baseUrl}}/habitaciones", "host": ["{{baseUrl}}"], "path": ["habitaciones"] } }
+    },
+    {
+      "name": "3. Resumen ejecutivo del cliente",
+      "event": [{ "listen": "test", "script": { "exec": [
+        "pm.test('Estado 200 OK', () => pm.response.to.have.status(200));",
+        "pm.test('Agregados y lista limpia', () => { const j = pm.response.json(); pm.expect(j.totalReservasRealizadas).to.eql(1); pm.expect(j.montoTotalGastado).to.eql(700); pm.expect(j.reservasRecientes).to.have.length(1); pm.expect(j.reservasRecientes[0]).not.to.have.property('cliente'); });"
+      ] } }],
+      "request": { "method": "GET", "header": [], "url": { "raw": "{{baseUrl}}/clientes/{{clienteId}}/resumen", "host": ["{{baseUrl}}"], "path": ["clientes", "{{clienteId}}", "resumen"] } }
+    },
+    {
+      "name": "4. PATCH selectivo",
+      "event": [{ "listen": "test", "script": { "exec": [
+        "pm.test('Estado 200 OK', () => pm.response.to.have.status(200));",
+        "pm.test('Solo cambia el nombre', () => { const j = pm.response.json(); pm.expect(j.nombre).to.eql('Nuevo Nombre Modificado'); pm.expect(j.email).to.eql('evidencia.20260929@hotel.com'); pm.expect(j.activo).to.be.true; pm.expect(j.penalizaciones).to.eql(0); });"
+      ] } }],
+      "request": {
+        "method": "PATCH",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": { "mode": "raw", "raw": "{\n  \"nombre\": \"Nuevo Nombre Modificado\"\n}", "options": { "raw": { "language": "json" } } },
+        "url": { "raw": "{{baseUrl}}/clientes/{{clienteId}}", "host": ["{{baseUrl}}"], "path": ["clientes", "{{clienteId}}"] }
+      }
+    }
+  ]
+}
