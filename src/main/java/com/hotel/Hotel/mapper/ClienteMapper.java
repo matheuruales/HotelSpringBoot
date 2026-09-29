@@ -2,13 +2,17 @@ package com.hotel.Hotel.mapper;
 
 import com.hotel.Hotel.domain.Cliente;
 import com.hotel.Hotel.domain.Reserva;
+import com.hotel.Hotel.dto.request.ActualizarClienteRequest;
 import com.hotel.Hotel.dto.request.CrearClienteRequest;
 import com.hotel.Hotel.dto.response.ClienteResponse;
 import com.hotel.Hotel.dto.response.ClienteResumenResponse;
 import com.hotel.Hotel.dto.response.ReservaItemResponse;
+import org.mapstruct.BeanMapping;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import org.mapstruct.MappingTarget;
 import org.mapstruct.Named;
+import org.mapstruct.NullValuePropertyMappingStrategy;
 
 import java.util.List;
 
@@ -49,6 +53,13 @@ public interface ClienteMapper {
                 ? List.of()
                 : reservas.stream().map(this::toReservaItemResponse).toList();
     }
+
+    @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "activo", ignore = true)
+    @Mapping(target = "penalizaciones", ignore = true)
+    @Mapping(target = "reservas", ignore = true)
+    void actualizarCliente(ActualizarClienteRequest request, @MappingTarget Cliente cliente);
 
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "activo", ignore = true)

@@ -1,6 +1,7 @@
 package com.hotel.Hotel.service;
 
 import com.hotel.Hotel.domain.Cliente;
+import com.hotel.Hotel.dto.request.ActualizarClienteRequest;
 import com.hotel.Hotel.dto.request.CrearClienteRequest;
 import com.hotel.Hotel.dto.response.ClienteResponse;
 import com.hotel.Hotel.dto.response.ClienteResumenResponse;
@@ -47,5 +48,13 @@ public class ClienteService {
         Cliente cliente = clienteRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Cliente no encontrado con ID: " + id));
         return clienteMapper.toResumenResponse(cliente);
+    }
+
+    @Transactional
+    public ClienteResponse actualizarParcialmente(UUID id, ActualizarClienteRequest request) {
+        Cliente cliente = clienteRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Cliente no encontrado con ID: " + id));
+        clienteMapper.actualizarCliente(request, cliente);
+        return clienteMapper.toResponse(clienteRepository.save(cliente));
     }
 }
