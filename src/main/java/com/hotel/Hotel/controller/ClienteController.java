@@ -2,6 +2,7 @@ package com.hotel.Hotel.controller;
 
 import com.hotel.Hotel.dto.request.CrearClienteRequest;
 import com.hotel.Hotel.dto.response.ClienteResponse;
+import com.hotel.Hotel.dto.response.ClienteResumenResponse;
 import com.hotel.Hotel.service.ClienteService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -37,5 +38,10 @@ public class ClienteController {
     @GetMapping("/{id}")
     public ResponseEntity<ClienteResponse> buscarPorId(@PathVariable UUID id) {
         return ResponseEntity.ok(clienteService.obtenerPorId(id));
+    }
+
+    @GetMapping("/{id}/resumen")
+    public ResponseEntity<ClienteResumenResponse> obtenerResumen(@PathVariable UUID id) {
+        return ResponseEntity.ok(clienteService.obtenerResumen(id));
     }
 }
