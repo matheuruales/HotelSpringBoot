@@ -17,11 +17,11 @@ public class SuitePresidencial extends Habitacion {
     protected SuitePresidencial() {
     }
 
-    public SuitePresidencial(String numero, int capacidadMaxima, double precioPorNoche, boolean mayordomo,
-            boolean jacuzzi) {
+    public SuitePresidencial(String numero, int capacidadMaxima, double precioPorNoche, boolean incluyeMayordomo,
+            boolean jacuzziPrivado) {
         super(numero, capacidadMaxima, precioPorNoche);
-        this.incluyeMayordomo = mayordomo;
-        this.jacuzziPrivado = jacuzzi;
+        this.incluyeMayordomo = incluyeMayordomo;
+        this.jacuzziPrivado = jacuzziPrivado;
     }
 
     public boolean isIncluyeMayordomo() {
