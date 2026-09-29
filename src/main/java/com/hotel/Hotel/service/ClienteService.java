@@ -54,7 +54,7 @@ public class ClienteService {
     public ClienteResponse actualizarParcialmente(UUID id, ActualizarClienteRequest request) {
         Cliente cliente = clienteRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Cliente no encontrado con ID: " + id));
-        clienteMapper.actualizarCliente(request, cliente);
+        clienteMapper.updateClienteFromDto(request, cliente);
         return clienteMapper.toResponse(clienteRepository.save(cliente));
     }
 }

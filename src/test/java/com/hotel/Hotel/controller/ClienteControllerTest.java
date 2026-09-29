@@ -2,9 +2,15 @@ package com.hotel.Hotel.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hotel.Hotel.domain.Cliente;
+import com.hotel.Hotel.domain.RangoFechas;
+import com.hotel.Hotel.domain.Reserva;
+import com.hotel.Hotel.domain.SuitePresidencial;
 import com.hotel.Hotel.dto.request.ActualizarClienteRequest;
 import com.hotel.Hotel.dto.request.CrearClienteRequest;
 import com.hotel.Hotel.repository.ClienteRepository;
+import com.hotel.Hotel.repository.HabitacionRepository;
+import com.hotel.Hotel.repository.ReservaRepository;
+import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -17,6 +23,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.UUID;
+import java.time.LocalDateTime;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -36,6 +43,15 @@ class ClienteControllerTest {
 
     @Autowired
     private ClienteRepository clienteRepository;
+
+    @Autowired
+    private HabitacionRepository habitacionRepository;
+
+    @Autowired
+    private ReservaRepository reservaRepository;
+
+    @Autowired
+    private EntityManager entityManager;
 
     private Cliente clienteExistente;
 
@@ -231,6 +247,30 @@ class ClienteControllerTest {
                 .andExpect(jsonPath("$.length()").value(2))
                 .andExpect(jsonPath("$[0].nombre").exists())
                 .andExpect(jsonPath("$[1].nombre").exists());
+    }
+
+    @Test
+    @DisplayName("GET /api/clientes/{id}/resumen - Debe calcular agregados y evitar referencias cíclicas")
+    void debeObtenerResumenEjecutivo() throws Exception {
+        SuitePresidencial suite = habitacionRepository.save(
+                new SuitePresidencial("P05-501", 2, 350.0, true, true));
+        reservaRepository.save(new Reserva(
+                clienteExistente,
+                suite,
+                new RangoFechas(
+                        LocalDateTime.of(2026, 10, 1, 15, 0),
+                        LocalDateTime.of(2026, 10, 3, 15, 0))));
+
+        entityManager.flush();
+        entityManager.clear();
+
+        mockMvc.perform(get("/api/clientes/{id}/resumen", clienteExistente.getId()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.totalReservasRealizadas").value(1))
+                .andExpect(jsonPath("$.montoTotalGastado").value(700.0))
+                .andExpect(jsonPath("$.reservasRecientes.length()").value(1))
+                .andExpect(jsonPath("$.reservasRecientes[0].numeroHabitacion").value("P05-501"))
+                .andExpect(jsonPath("$.reservasRecientes[0].cliente").doesNotExist());
     }
 
     @Test

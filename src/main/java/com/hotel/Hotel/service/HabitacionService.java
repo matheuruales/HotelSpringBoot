@@ -39,6 +39,18 @@ public class HabitacionService {
         return habitacionMapper.toResponse(habitacionRepository.save(habitacion));
     }
 
+    @Transactional
+    public HabitacionResponse crearEstandar(CrearHabitacionEstandarRequest request) {
+        return habitacionMapper.toResponse(
+                habitacionRepository.save(habitacionMapper.toEntity(request)));
+    }
+
+    @Transactional
+    public HabitacionResponse crearSuite(CrearSuitePresidencialRequest request) {
+        return habitacionMapper.toResponse(
+                habitacionRepository.save(habitacionMapper.toEntity(request)));
+    }
+
     @Transactional(readOnly = true)
     public List<HabitacionResponse> listarTodas() {
         return habitacionMapper.toResponseList(habitacionRepository.findAll());
